@@ -24,44 +24,17 @@ Partial Class MainForm
   Private Sub InitializeComponent()
     Me.components = New System.ComponentModel.Container()
     Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(MainForm))
-    Me.NotifyIcon1 = New System.Windows.Forms.NotifyIcon(Me.components)
-    Me.ContextMenuStrip1 = New System.Windows.Forms.ContextMenuStrip(Me.components)
-    Me.ExitToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-    Me.BgWk = New System.ComponentModel.BackgroundWorker()
     Me.Panel1 = New System.Windows.Forms.Panel()
     Me.Panel2 = New System.Windows.Forms.Panel()
     Me.LabelMessage = New System.Windows.Forms.Label()
     Me.LabelTitle = New System.Windows.Forms.Label()
     Me.PictureBox1 = New System.Windows.Forms.PictureBox()
     Me.ImageList1 = New System.Windows.Forms.ImageList(Me.components)
-    Me.ContextMenuStrip1.SuspendLayout()
+    Me.Blink = New System.Windows.Forms.Timer(Me.components)
     Me.Panel1.SuspendLayout()
     Me.Panel2.SuspendLayout()
     CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
     Me.SuspendLayout()
-    '
-    'NotifyIcon1
-    '
-    Me.NotifyIcon1.ContextMenuStrip = Me.ContextMenuStrip1
-    Me.NotifyIcon1.Text = "NotifyIcon1"
-    Me.NotifyIcon1.Visible = True
-    '
-    'ContextMenuStrip1
-    '
-    Me.ContextMenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.ExitToolStripMenuItem})
-    Me.ContextMenuStrip1.Name = "ContextMenuStrip1"
-    Me.ContextMenuStrip1.Size = New System.Drawing.Size(93, 26)
-    '
-    'ExitToolStripMenuItem
-    '
-    Me.ExitToolStripMenuItem.Name = "ExitToolStripMenuItem"
-    Me.ExitToolStripMenuItem.Size = New System.Drawing.Size(92, 22)
-    Me.ExitToolStripMenuItem.Text = "Exit"
-    '
-    'BgWk
-    '
-    Me.BgWk.WorkerReportsProgress = True
-    Me.BgWk.WorkerSupportsCancellation = True
     '
     'Panel1
     '
@@ -123,34 +96,34 @@ Partial Class MainForm
     Me.ImageList1.TransparentColor = System.Drawing.Color.Transparent
     Me.ImageList1.Images.SetKeyName(0, "iconmonstr-phone-5-icon.png")
     '
+    'Blink
+    '
+    Me.Blink.Interval = 300
+    '
     'MainForm
     '
     Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
     Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
     Me.BackColor = System.Drawing.Color.Black
     Me.ClientSize = New System.Drawing.Size(320, 80)
-    Me.ControlBox = False
     Me.Controls.Add(Me.Panel1)
     Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None
     Me.Name = "MainForm"
     Me.Padding = New System.Windows.Forms.Padding(2)
+    Me.ShowInTaskbar = False
     Me.StartPosition = System.Windows.Forms.FormStartPosition.Manual
     Me.Text = "Form1"
-    Me.ContextMenuStrip1.ResumeLayout(False)
     Me.Panel1.ResumeLayout(False)
     Me.Panel2.ResumeLayout(False)
     CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
     Me.ResumeLayout(False)
 
   End Sub
-  Friend WithEvents NotifyIcon1 As System.Windows.Forms.NotifyIcon
-  Friend WithEvents ContextMenuStrip1 As System.Windows.Forms.ContextMenuStrip
-  Friend WithEvents ExitToolStripMenuItem As System.Windows.Forms.ToolStripMenuItem
-  Friend WithEvents BgWk As System.ComponentModel.BackgroundWorker
   Friend WithEvents Panel1 As System.Windows.Forms.Panel
   Friend WithEvents PictureBox1 As System.Windows.Forms.PictureBox
   Friend WithEvents Panel2 As System.Windows.Forms.Panel
   Friend WithEvents LabelTitle As System.Windows.Forms.Label
   Friend WithEvents LabelMessage As System.Windows.Forms.Label
   Friend WithEvents ImageList1 As System.Windows.Forms.ImageList
+  Friend WithEvents Blink As System.Windows.Forms.Timer
 End Class
