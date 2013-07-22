@@ -1,10 +1,26 @@
 ﻿Imports System.Threading
+Imports Microsoft.Win32
 
 Public Class Ctx
   Inherits ApplicationContext
 
   Private WithEvents c As New Component1()
   Private mSocket As System.Net.Sockets.UdpClient = Nothing
+  Private mMainForm As New MainForm()
+  Private Shared mPairingLock As New Object()
+  Public Shared Pairing As Boolean = False
+
+  Public Shared Sub SetPairing(b As Boolean)
+    SyncLock (mPairingLock)
+      Pairing = b
+    End SyncLock
+  End Sub
+
+  Public Shared Function GetPairing() As Boolean
+    SyncLock (mPairingLock)
+      Return Pairing
+    End SyncLock
+  End Function
 
   Private Sub ToolStripMenuItem1_Click(sender As Object, e As System.EventArgs)
     Dim keys As New List(Of String)
@@ -24,20 +40,28 @@ Public Class Ctx
   End Sub
 
   Private Sub FormClosing(sender As Object, e As System.Windows.Forms.FormClosingEventArgs)
-    mDictForm.Remove(CType(sender, MainForm).DeviceId)
+    mDictForm.Remove(CType(sender, NotiForm).DeviceId)
   End Sub
 
-  Dim mDictForm As New Dictionary(Of String, MainForm)
+  Private Sub NtfIcon_Doubleclick(sender As Object, e As System.EventArgs)
+    mMainForm.Visible = Not mMainForm.Visible
+  End Sub
+
+  Dim mDictForm As New Dictionary(Of String, NotiForm)
 
   Private Sub ShowMsg(msg As Object)
     Dim m As New AndroidUdpBroadMsg(CType(msg, String))
-    Dim f As MainForm
+    Dim f As NotiForm
 
     If (Not mDictForm.ContainsKey(m.DeviceId)) Then
-      f = New MainForm(m.DeviceId)
+      f = New NotiForm(m.DeviceId)
       mDictForm.Add(m.DeviceId, f)
       f.SetLabelTitle(m.Model)
-      f.SetLabelMsg(m.Msg)
+
+      If (m.MsgKey <> "PAIR") Then
+        f.SetLabelMsg(m.Msg)
+      End If
+
       f.TopMost = True
       AddHandler f.FormClosing, AddressOf FormClosing
       Application.Run(f)
@@ -45,6 +69,20 @@ Public Class Ctx
       f = mDictForm(m.DeviceId)
       f.Toggle(True)
     End If
+  End Sub
+
+  Private Sub AddNewDevice(msg As String)
+    Try
+      Dim m As New AndroidUdpBroadMsg(msg)
+      Dim kSoftware As RegistryKey = My.Computer.Registry.CurrentUser.OpenSubKey("software", True)
+      Dim kAmeebaa As RegistryKey = kSoftware.CreateSubKey("Ameebaa")
+      Dim kPaired As RegistryKey = kAmeebaa.CreateSubKey("paired")
+      kPaired.SetValue(m.DeviceId, m.Model, RegistryValueKind.String)
+      kPaired.Close()
+      kAmeebaa.Close()
+      kSoftware.Close()
+    Catch ex As Exception
+    End Try
   End Sub
 
   Private Sub MessageLoop()
@@ -59,6 +97,9 @@ Public Class Ctx
         mSocket.Close()
         Dim msg As String = System.Text.UTF8Encoding.UTF8.GetString(bytes)
         Dim arr() As String = msg.Split(Chr(8))
+        If ((arr.Length >= 2) AndAlso (arr(2) = "PAIR") AndAlso GetPairing()) Then
+          AddNewDevice(msg)
+        End If
         Dim t As New Thread(AddressOf ShowMsg)
         t.Start(msg)
       Loop
@@ -72,13 +113,42 @@ Public Class Ctx
 
   Public Sub Init()
     AddHandler c.ToolStripMenuItem1.Click, AddressOf ToolStripMenuItem1_Click
+    AddHandler c.NtfIcon.DoubleClick, AddressOf NtfIcon_Doubleclick
 
+    Dim kSoftware As RegistryKey = My.Computer.Registry.CurrentUser.OpenSubKey("software", True)
+    Dim kAmeebaa As RegistryKey = kSoftware.CreateSubKey("Ameebaa")
+    Dim kPaired As RegistryKey = kAmeebaa.CreateSubKey("paired")
+    Dim names() As String = kPaired.GetValueNames()
+    For Each n As String In names
+      Dim model As String = kPaired.GetValue(n, n)
+      Dim msg As New AndroidUdpBroadMsg(model, model)
+      Dim t As New Thread(AddressOf ShowNoti)
+      t.Start(msg)
+    Next
+    kPaired.Close()
+    kAmeebaa.Close()
+    kSoftware.Close()
+  End Sub
+
+  Private Sub ShowNoti(msg As Object)
+    Dim m As AndroidUdpBroadMsg = CType(msg, AndroidUdpBroadMsg)
+    Dim f As NotiForm
+    If (Not mDictForm.ContainsKey(m.DeviceId)) Then
+      f = New NotiForm(m.DeviceId)
+      mDictForm.Add(m.DeviceId, f)
+      f.SetLabelTitle(m.Model)
+
+      f.TopMost = True
+      AddHandler f.FormClosing, AddressOf FormClosing
+      Application.Run(f)
+    Else
+      f = mDictForm(m.Model)
+      f.Toggle(True)
+    End If
   End Sub
 
   Public Sub New()
     Init()
-    Dim t As New Thread(AddressOf MessageLoop)
-    t.Start()
   End Sub
 
   Private Sub Ctx_ThreadExit(sender As Object, e As System.EventArgs) Handles Me.ThreadExit

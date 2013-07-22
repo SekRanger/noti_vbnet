@@ -4,6 +4,11 @@
   Public MsgKey As String
   Public Msg As String
 
+  Public Sub New(did As String, m As String)
+    DeviceId = did
+    Model = m
+  End Sub
+
   Public Sub New(raw As String)
     Dim arr() As String = raw.Split(Chr(8))
     DeviceId = arr(0)
