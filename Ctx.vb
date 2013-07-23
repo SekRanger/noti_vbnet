@@ -56,17 +56,15 @@ Public Class Ctx
     If (Not mDictForm.ContainsKey(m.DeviceId)) Then
       f = New NotiForm(m.DeviceId)
       mDictForm.Add(m.DeviceId, f)
-      f.SetLabelTitle(m.Model)
-
-      If (m.MsgKey <> "PAIR") Then
-        f.SetLabelMsg(m.Msg)
-      End If
-
       f.TopMost = True
+
+      f.ProcessThisShit(m)
+
       AddHandler f.FormClosing, AddressOf FormClosing
       Application.Run(f)
     Else
       f = mDictForm(m.DeviceId)
+      f.ProcessThisShit(m)
       f.Toggle(True)
     End If
   End Sub
@@ -97,8 +95,12 @@ Public Class Ctx
         mSocket.Close()
         Dim msg As String = System.Text.UTF8Encoding.UTF8.GetString(bytes)
         Dim arr() As String = msg.Split(Chr(8))
-        If ((arr.Length >= 2) AndAlso (arr(2) = "PAIR") AndAlso GetPairing()) Then
-          AddNewDevice(msg)
+        If ((arr.Length >= 2) AndAlso (arr(2) = "PAIR")) Then
+          If (GetPairing()) Then
+            AddNewDevice(msg)
+          Else
+            Continue Do
+          End If
         End If
         Dim t As New Thread(AddressOf ShowMsg)
         t.Start(msg)
@@ -149,6 +151,8 @@ Public Class Ctx
 
   Public Sub New()
     Init()
+    Dim tLoop As New Thread(AddressOf MessageLoop)
+    tLoop.Start()
   End Sub
 
   Private Sub Ctx_ThreadExit(sender As Object, e As System.EventArgs) Handles Me.ThreadExit

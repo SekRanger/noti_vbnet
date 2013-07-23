@@ -1,11 +1,32 @@
-﻿Public Class NotiForm
+﻿Imports System.Threading
+
+Public Class NotiForm
   Private Shared IS_RINGING As Boolean = False
-  Private Delegate Sub ToggleDelegate(b As Boolean)
+  Private Delegate Sub ToggleDelegate(ByVal b As Boolean)
   Private mJustStart As Boolean = True
-  Private mSocket As System.Net.Sockets.UdpClient
-  Private mRE As New System.Threading.ManualResetEvent(False)
   Private mWaitShown As New System.Threading.ManualResetEvent(False)
   Private mDeviceId As String
+  Private mShaking As Boolean = False
+  Private mThreadShake As Thread
+  Private mRinging As Boolean = False
+  Private mTalking As Boolean = False
+  Private mRingPhoneNo As String = String.Empty
+  'Private mDictionary
+  Private mCountMissedCall As Integer = 0
+  Private mThreadCounter As Thread
+
+  Private Sub counter(ByVal o As Object)
+    Dim startMsg As String = o.ToString()
+    Dim c As Integer = 0
+    Try
+      Do
+        Threading.Thread.Sleep(1000)
+        c += 1
+        SetLabelMsg(String.Format("{0} ({1:0000} s.)", startMsg, c))
+      Loop
+    Catch ex As Exception
+    End Try
+  End Sub
 
   Public ReadOnly Property DeviceId As String
     Get
@@ -13,7 +34,7 @@
     End Get
   End Property
 
-  Public Sub Toggle(b As Boolean)
+  Public Sub Toggle(ByVal b As Boolean)
     If (Me.InvokeRequired) Then
       Dim cb As New ToggleDelegate(AddressOf Toggle)
       Me.Invoke(cb, b)
@@ -22,8 +43,8 @@
     End If
   End Sub
 
-  Private Delegate Sub SetLabelTitleDelegate(txt As String)
-  Public Sub SetLabelTitle(txt As String)
+  Private Delegate Sub SetLabelTitleDelegate(ByVal txt As String)
+  Public Sub SetLabelTitle(ByVal txt As String)
     If (LabelTitle.InvokeRequired) Then
       Dim cb As New SetLabelTitleDelegate(AddressOf SetLabelTitle)
       Me.LabelTitle.Invoke(cb, txt)
@@ -32,8 +53,8 @@
     End If
   End Sub
 
-  Private Delegate Sub SetLabelMsgDelegate(txt As String)
-  Public Sub SetLabelMsg(txt As String)
+  Private Delegate Sub SetLabelMsgDelegate(ByVal txt As String)
+  Public Sub SetLabelMsg(ByVal txt As String)
     If (LabelTitle.InvokeRequired) Then
       Dim cb As New SetLabelMsgDelegate(AddressOf SetLabelMsg)
       Me.LabelMessage.Invoke(cb, txt)
@@ -52,7 +73,7 @@
     End If
   End Sub
 
-  Public Sub New(deviceId As String)
+  Public Sub New(ByVal deviceId As String)
     mDeviceId = deviceId
     ' This call is required by the designer.
     InitializeComponent()
@@ -63,23 +84,41 @@
     Me.Top = r.Bottom - Me.Bottom - 8
     Me.Left = r.Right - Me.Right - 8
     'BgWk.RunWorkerAsync()
+    Me.LabelMessage.Text = String.Empty
     Me.TopMost = True
   End Sub
 
-  Private Sub NotifyIcon1_DoubleClick(sender As Object, e As System.EventArgs)
+  Private Sub NotifyIcon1_DoubleClick(ByVal sender As Object, ByVal e As System.EventArgs)
     Toggle(Not Visible)
   End Sub
 
-  Private Sub MainForm_Shown(sender As Object, e As System.EventArgs) Handles Me.Shown
+  Private Sub NotiForm_FormClosing(ByVal sender As Object, ByVal e As System.Windows.Forms.FormClosingEventArgs) Handles Me.FormClosing
+    If (mShaking) Then
+      mThreadShake.Interrupt()
+    End If
+  End Sub
+
+  Private Sub MainForm_Shown(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Shown
     If (Not mJustStart) Then
       mJustStart = True
       'mWaitShown.Set()
     End If
     Me.TopMost = True
-    Blink.Start()
   End Sub
 
-  Private Sub Blink_Tick(sender As Object, e As System.EventArgs) Handles Blink.Tick
+  Private Sub BlinkStart()
+    If (Not Blink.Enabled) Then
+      Blink.Start()
+    End If
+  End Sub
+
+  Private Sub BlinkStop()
+    If (Blink.Enabled) Then
+      Blink.Stop()
+    End If
+  End Sub
+
+  Private Sub Blink_Tick(ByVal sender As Object, ByVal e As System.EventArgs) Handles Blink.Tick
     'Me.Visible = Not Me.Visible()
     If (Me.Opacity = 1) Then
       Me.Opacity = 0
@@ -88,7 +127,7 @@
     End If
   End Sub
 
-  Private Sub LabelTitle_DoubleClick(sender As Object, e As System.EventArgs) Handles LabelTitle.DoubleClick
+  Private Sub LabelTitle_DoubleClick(ByVal sender As Object, ByVal e As System.EventArgs)
     Me.TopMost = True
   End Sub
 
@@ -105,4 +144,141 @@
       Return MyBase.CreateParams
     End Get
   End Property
+
+  Protected Overrides Sub WndProc(ByRef m As System.Windows.Forms.Message)
+    Select Case m.Msg
+      Case &H84
+        MyBase.WndProc(m)
+        If (CType(m.Result, Integer) = 1) Then
+          m.Result = 2
+        End If
+        Return
+    End Select
+    MyBase.WndProc(m)
+  End Sub
+
+  Private Delegate Sub SetLocDelegate(ByVal p As Point)
+  Private Sub SetLoc(ByVal p As Point)
+    If (Me.InvokeRequired) Then
+      Dim cb As New SetLocDelegate(AddressOf SetLoc)
+      Me.Invoke(cb, p)
+    Else
+      Me.Location = p
+    End If
+  End Sub
+
+  Private Delegate Function GetLocDelegate() As Point
+  Private Function GetLoc() As Point
+    If (Me.InvokeRequired) Then
+      Dim cb As New GetLocDelegate(AddressOf GetLoc)
+      Return Me.Invoke(cb)
+    Else
+      Return Me.Location
+    End If
+  End Function
+
+  Private Sub _shake()
+    If (Not mShaking) Then
+      mShaking = True
+      Dim o As Point = GetLoc()
+      Dim r As New System.Random()
+      Dim rs As New System.Random()
+      Dim d1 As DateTime
+      Dim d2 As DateTime
+
+      Try
+        Do
+          d1 = DateTime.Now
+          Do
+            Dim newX As Integer = r.Next(8)
+            If (rs.Next(8) > 4) Then
+              newX = 0 - newX
+            End If
+            Dim newY As Integer = r.Next(8)
+            If (rs.Next(8) > 4) Then
+              newY = 0 - newY
+            End If
+            Dim n As New Point(o.X + newX, o.Y + newY)
+            'Me.Location = n
+            SetLoc(n)
+            Threading.Thread.Sleep(28)
+            d2 = DateTime.Now
+          Loop Until (d2.Subtract(d1).TotalMilliseconds >= 1000)
+          SetLoc(o)
+          Threading.Thread.Sleep(3000)
+        Loop
+      Catch ex As Threading.ThreadInterruptedException
+      End Try
+
+      SetLoc(o)
+      mShaking = False
+    End If
+  End Sub
+
+  Public Sub Shake()
+    If (Not mShaking) Then
+      mThreadShake = New Thread(AddressOf _shake)
+      mThreadShake.Start()
+    End If
+  End Sub
+
+  Public Sub StopShake()
+    mThreadShake.Interrupt()
+  End Sub
+
+  Private Sub LabelMessage_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles LabelMessage.Click
+    Shake()
+  End Sub
+
+  Private Sub LabelTitle_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles LabelTitle.Click
+    mThreadShake.Interrupt()
+  End Sub
+
+  Private Sub StartCounter(ByVal startMsg As String)
+    mThreadCounter = New Thread(AddressOf counter)
+    mThreadCounter.Start(startMsg)
+  End Sub
+
+  Private Sub StopCounter()
+    Try
+      mThreadCounter.Interrupt()
+    Catch ex As Exception
+    End Try
+  End Sub
+
+  Public Sub ProcessThisShit(ByVal m As AndroidUdpBroadMsg)
+    Select Case m.MsgKey
+      Case "PAIR"
+        SetLabelTitle(m.Model)
+      Case "RINGING"
+        StopCounter()
+        mRinging = True
+        mRingPhoneNo = m.Msg
+        Shake()
+        SetLabelMsg("RINGING: " & m.Msg)
+        StartCounter("RINGING: " & m.Msg)
+      Case "OFFHOOK"
+        StopCounter()
+        mRinging = False
+        mTalking = True
+        SetLabelMsg("In call: " & mRingPhoneNo)
+        StartCounter("In call: " & mRingPhoneNo)
+        StopShake()
+      Case "IDLE"
+        StopCounter()
+        StopShake()
+        SetLabelMsg(String.Empty)
+        If (mRinging AndAlso Not mTalking) Then
+          mCountMissedCall += 1
+          If (mCountMissedCall = 1) Then
+            SetLabelTitle(m.Model & " - " & mCountMissedCall & " missed-call.")
+          Else
+            SetLabelTitle(m.Model & " - " & mCountMissedCall & " missed-call(s).")
+          End If
+        End If
+        mRinging = False
+        mTalking = False
+        mRingPhoneNo = String.Empty
+    End Select
+  End Sub
 End Class
