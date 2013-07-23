@@ -9,6 +9,7 @@ Public Class Ctx
   Private mMainForm As New MainForm()
   Private Shared mPairingLock As New Object()
   Public Shared Pairing As Boolean = False
+  Private mShouldClose As Boolean = False
 
   Public Shared Sub SetPairing(b As Boolean)
     SyncLock (mPairingLock)
@@ -23,6 +24,7 @@ Public Class Ctx
   End Function
 
   Private Sub ToolStripMenuItem1_Click(sender As Object, e As System.EventArgs)
+    mShouldClose = True
     Dim keys As New List(Of String)
 
     For Each k As String In mDictForm.Keys
@@ -40,7 +42,16 @@ Public Class Ctx
   End Sub
 
   Private Sub FormClosing(sender As Object, e As System.Windows.Forms.FormClosingEventArgs)
-    mDictForm.Remove(CType(sender, NotiForm).DeviceId)
+    e.Cancel = True
+    If (mShouldClose) Then
+      e.Cancel = False
+    End If
+
+    If (e.Cancel) Then
+      CType(sender, NotiForm).Toggle(False)
+    Else
+      mDictForm.Remove(CType(sender, NotiForm).DeviceId)
+    End If
   End Sub
 
   Private Sub NtfIcon_Doubleclick(sender As Object, e As System.EventArgs)
@@ -54,6 +65,7 @@ Public Class Ctx
     Dim f As NotiForm
 
     If (Not mDictForm.ContainsKey(m.DeviceId)) Then
+      Debug.Print(m.DeviceId)
       f = New NotiForm(m.DeviceId)
       mDictForm.Add(m.DeviceId, f)
       f.TopMost = True
@@ -97,6 +109,7 @@ Public Class Ctx
         Dim arr() As String = msg.Split(Chr(8))
         If ((arr.Length >= 2) AndAlso (arr(2) = "PAIR")) Then
           If (GetPairing()) Then
+            mMainForm.ClosePairForm()
             AddNewDevice(msg)
           Else
             Continue Do
@@ -123,7 +136,7 @@ Public Class Ctx
     Dim names() As String = kPaired.GetValueNames()
     For Each n As String In names
       Dim model As String = kPaired.GetValue(n, n)
-      Dim msg As New AndroidUdpBroadMsg(model, model)
+      Dim msg As New AndroidUdpBroadMsg(n, model)
       Dim t As New Thread(AddressOf ShowNoti)
       t.Start(msg)
     Next

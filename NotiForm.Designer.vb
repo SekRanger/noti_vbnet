@@ -27,24 +27,26 @@ Partial Class NotiForm
     Me.Panel1 = New System.Windows.Forms.Panel()
     Me.Panel2 = New System.Windows.Forms.Panel()
     Me.LabelMessage = New System.Windows.Forms.Label()
+    Me.PictureBox1 = New System.Windows.Forms.PictureBox()
     Me.ImageList1 = New System.Windows.Forms.ImageList(Me.components)
     Me.Blink = New System.Windows.Forms.Timer(Me.components)
-    Me.PictureBox1 = New System.Windows.Forms.PictureBox()
+    Me.Panel3 = New System.Windows.Forms.Panel()
+    Me.Label1 = New System.Windows.Forms.Label()
     Me.LabelTitle = New System.Windows.Forms.Label()
     Me.Panel1.SuspendLayout()
     Me.Panel2.SuspendLayout()
     CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
+    Me.Panel3.SuspendLayout()
     Me.SuspendLayout()
     '
     'Panel1
     '
     Me.Panel1.BackColor = System.Drawing.Color.FromArgb(CType(CType(255, Byte), Integer), CType(CType(255, Byte), Integer), CType(CType(192, Byte), Integer))
     Me.Panel1.Controls.Add(Me.Panel2)
-    Me.Panel1.Controls.Add(Me.LabelTitle)
     Me.Panel1.Dock = System.Windows.Forms.DockStyle.Fill
-    Me.Panel1.Location = New System.Drawing.Point(2, 2)
+    Me.Panel1.Location = New System.Drawing.Point(2, 20)
     Me.Panel1.Name = "Panel1"
-    Me.Panel1.Size = New System.Drawing.Size(316, 76)
+    Me.Panel1.Size = New System.Drawing.Size(316, 58)
     Me.Panel1.TabIndex = 1
     '
     'Panel2
@@ -53,9 +55,9 @@ Partial Class NotiForm
     Me.Panel2.Controls.Add(Me.PictureBox1)
     Me.Panel2.Dock = System.Windows.Forms.DockStyle.Fill
     Me.Panel2.Font = New System.Drawing.Font("Microsoft Sans Serif", 12.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(222, Byte))
-    Me.Panel2.Location = New System.Drawing.Point(0, 16)
+    Me.Panel2.Location = New System.Drawing.Point(0, 0)
     Me.Panel2.Name = "Panel2"
-    Me.Panel2.Size = New System.Drawing.Size(316, 60)
+    Me.Panel2.Size = New System.Drawing.Size(316, 58)
     Me.Panel2.TabIndex = 1
     '
     'LabelMessage
@@ -65,10 +67,21 @@ Partial Class NotiForm
     Me.LabelMessage.Location = New System.Drawing.Point(60, 0)
     Me.LabelMessage.Name = "LabelMessage"
     Me.LabelMessage.Padding = New System.Windows.Forms.Padding(8)
-    Me.LabelMessage.Size = New System.Drawing.Size(256, 60)
+    Me.LabelMessage.Size = New System.Drawing.Size(256, 58)
     Me.LabelMessage.TabIndex = 1
     Me.LabelMessage.Text = "Message"
     Me.LabelMessage.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
+    '
+    'PictureBox1
+    '
+    Me.PictureBox1.Dock = System.Windows.Forms.DockStyle.Left
+    Me.PictureBox1.Location = New System.Drawing.Point(0, 0)
+    Me.PictureBox1.Name = "PictureBox1"
+    Me.PictureBox1.Size = New System.Drawing.Size(60, 58)
+    Me.PictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+    Me.PictureBox1.TabIndex = 2
+    Me.PictureBox1.TabStop = False
+    Me.PictureBox1.Visible = False
     '
     'ImageList1
     '
@@ -80,27 +93,40 @@ Partial Class NotiForm
     '
     Me.Blink.Interval = 300
     '
-    'PictureBox1
+    'Panel3
     '
-    Me.PictureBox1.Dock = System.Windows.Forms.DockStyle.Left
-    Me.PictureBox1.Location = New System.Drawing.Point(0, 0)
-    Me.PictureBox1.Name = "PictureBox1"
-    Me.PictureBox1.Size = New System.Drawing.Size(60, 60)
-    Me.PictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
-    Me.PictureBox1.TabIndex = 2
-    Me.PictureBox1.TabStop = False
-    Me.PictureBox1.Visible = False
+    Me.Panel3.BackColor = System.Drawing.Color.Transparent
+    Me.Panel3.Controls.Add(Me.Label1)
+    Me.Panel3.Controls.Add(Me.LabelTitle)
+    Me.Panel3.Dock = System.Windows.Forms.DockStyle.Top
+    Me.Panel3.Location = New System.Drawing.Point(2, 2)
+    Me.Panel3.Name = "Panel3"
+    Me.Panel3.Size = New System.Drawing.Size(316, 18)
+    Me.Panel3.TabIndex = 2
+    '
+    'Label1
+    '
+    Me.Label1.Cursor = System.Windows.Forms.Cursors.Hand
+    Me.Label1.Dock = System.Windows.Forms.DockStyle.Right
+    Me.Label1.Font = New System.Drawing.Font("Webdings", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(2, Byte))
+    Me.Label1.ForeColor = System.Drawing.Color.White
+    Me.Label1.Location = New System.Drawing.Point(284, 0)
+    Me.Label1.Name = "Label1"
+    Me.Label1.Size = New System.Drawing.Size(32, 18)
+    Me.Label1.TabIndex = 4
+    Me.Label1.Text = "r"
+    Me.Label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
     '
     'LabelTitle
     '
     Me.LabelTitle.BackColor = System.Drawing.Color.Black
-    Me.LabelTitle.Dock = System.Windows.Forms.DockStyle.Top
+    Me.LabelTitle.Dock = System.Windows.Forms.DockStyle.Fill
     Me.LabelTitle.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(222, Byte))
     Me.LabelTitle.ForeColor = System.Drawing.Color.White
     Me.LabelTitle.Location = New System.Drawing.Point(0, 0)
     Me.LabelTitle.Name = "LabelTitle"
-    Me.LabelTitle.Size = New System.Drawing.Size(316, 16)
-    Me.LabelTitle.TabIndex = 2
+    Me.LabelTitle.Size = New System.Drawing.Size(316, 18)
+    Me.LabelTitle.TabIndex = 3
     Me.LabelTitle.Text = "กิ้งกือสุนัข"
     Me.LabelTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
     '
@@ -111,7 +137,9 @@ Partial Class NotiForm
     Me.BackColor = System.Drawing.Color.Black
     Me.ClientSize = New System.Drawing.Size(320, 80)
     Me.Controls.Add(Me.Panel1)
+    Me.Controls.Add(Me.Panel3)
     Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None
+    Me.KeyPreview = True
     Me.Name = "NotiForm"
     Me.Padding = New System.Windows.Forms.Padding(2)
     Me.ShowInTaskbar = False
@@ -120,6 +148,7 @@ Partial Class NotiForm
     Me.Panel1.ResumeLayout(False)
     Me.Panel2.ResumeLayout(False)
     CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
+    Me.Panel3.ResumeLayout(False)
     Me.ResumeLayout(False)
 
   End Sub
@@ -129,5 +158,7 @@ Partial Class NotiForm
   Friend WithEvents ImageList1 As System.Windows.Forms.ImageList
   Friend WithEvents Blink As System.Windows.Forms.Timer
   Friend WithEvents PictureBox1 As System.Windows.Forms.PictureBox
+  Friend WithEvents Panel3 As System.Windows.Forms.Panel
+  Friend WithEvents Label1 As System.Windows.Forms.Label
   Friend WithEvents LabelTitle As System.Windows.Forms.Label
 End Class

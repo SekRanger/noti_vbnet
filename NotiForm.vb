@@ -20,9 +20,9 @@ Public Class NotiForm
     Dim c As Integer = 0
     Try
       Do
+        SetLabelMsg(String.Format("{0} ({1} s.)", startMsg, c))
         Threading.Thread.Sleep(1000)
         c += 1
-        SetLabelMsg(String.Format("{0} ({1:0000} s.)", startMsg, c))
       Loop
     Catch ex As Exception
     End Try
@@ -88,14 +88,22 @@ Public Class NotiForm
     Me.TopMost = True
   End Sub
 
-  Private Sub NotifyIcon1_DoubleClick(ByVal sender As Object, ByVal e As System.EventArgs)
-    Toggle(Not Visible)
+  Private Sub NotiForm_FormClosed(sender As Object, e As System.Windows.Forms.FormClosedEventArgs) Handles Me.FormClosed
+    StopShake()
+    StopCounter()
   End Sub
 
-  Private Sub NotiForm_FormClosing(ByVal sender As Object, ByVal e As System.Windows.Forms.FormClosingEventArgs) Handles Me.FormClosing
-    If (mShaking) Then
-      mThreadShake.Interrupt()
-    End If
+  Private Sub NotiForm_MouseEnter(sender As Object, e As System.EventArgs) Handles Me.MouseEnter
+    Me.Opacity = 100
+  End Sub
+
+  Private Sub NotiForm_MouseLeave(sender As Object, e As System.EventArgs) Handles Me.MouseLeave
+    Debug.Print("asdfasdfasdf")
+    Me.Opacity = 0
+  End Sub
+
+  Private Sub NotiForm_MouseMove(sender As Object, e As System.Windows.Forms.MouseEventArgs) Handles Me.MouseMove
+    Debug.Print("asdfasdfasdf")
   End Sub
 
   Private Sub MainForm_Shown(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Shown
@@ -125,10 +133,6 @@ Public Class NotiForm
     Else
       Me.Opacity = 1
     End If
-  End Sub
-
-  Private Sub LabelTitle_DoubleClick(ByVal sender As Object, ByVal e As System.EventArgs)
-    Me.TopMost = True
   End Sub
 
   <System.Runtime.InteropServices.DllImport("user32.dll", SetLastError:=False)> _
@@ -223,15 +227,10 @@ Public Class NotiForm
   End Sub
 
   Public Sub StopShake()
-    mThreadShake.Interrupt()
-  End Sub
-
-  Private Sub LabelMessage_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles LabelMessage.Click
-    Shake()
-  End Sub
-
-  Private Sub LabelTitle_Click(ByVal sender As Object, ByVal e As System.EventArgs) Handles LabelTitle.Click
-    mThreadShake.Interrupt()
+    Try
+      mThreadShake.Interrupt()
+    Catch ex As Exception
+    End Try
   End Sub
 
   Private Sub StartCounter(ByVal startMsg As String)
@@ -255,13 +254,11 @@ Public Class NotiForm
         mRinging = True
         mRingPhoneNo = m.Msg
         Shake()
-        SetLabelMsg("RINGING: " & m.Msg)
-        StartCounter("RINGING: " & m.Msg)
+        StartCounter("Ringing: " & m.Msg)
       Case "OFFHOOK"
         StopCounter()
         mRinging = False
         mTalking = True
-        SetLabelMsg("In call: " & mRingPhoneNo)
         StartCounter("In call: " & mRingPhoneNo)
         StopShake()
       Case "IDLE"
@@ -280,5 +277,31 @@ Public Class NotiForm
         mTalking = False
         mRingPhoneNo = String.Empty
     End Select
+  End Sub
+
+  Private mDragged As Boolean = False
+  Private mStartDragPoint As Point
+
+  Private Sub LabelTitle_MouseDown(sender As Object, e As System.Windows.Forms.MouseEventArgs)
+    mDragged = True
+    mStartDragPoint = e.Location
+  End Sub
+
+  Private Sub LabelTitle_MouseMove(sender As Object, e As System.Windows.Forms.MouseEventArgs)
+    If (mDragged) Then
+      Dim p1 As Point = e.Location
+      Dim p2 As Point = PointToScreen(p1)
+      Dim p3 As Point = New Point(p2.X - mStartDragPoint.X,
+                                     p2.Y - mStartDragPoint.Y)
+      Me.Location = p3
+    End If
+  End Sub
+
+  Private Sub LabelTitle_MouseUp(sender As Object, e As System.Windows.Forms.MouseEventArgs)
+    mDragged = False
+  End Sub
+
+  Private Sub Label1_Click(sender As System.Object, e As System.EventArgs) Handles Label1.Click
+    Me.Close()
   End Sub
 End Class
