@@ -28,6 +28,9 @@
     InitializeComponent()
 
     ' Add any initialization after the InitializeComponent() call.
+  End Sub
+
+  Private Sub PairingForm_Shown(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Shown
     Ctx.SetPairing(True)
   End Sub
 End Class

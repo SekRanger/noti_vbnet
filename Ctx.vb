@@ -109,6 +109,7 @@ Public Class Ctx
         Dim arr() As String = msg.Split(Chr(8))
         If ((arr.Length >= 2) AndAlso (arr(2) = "PAIR")) Then
           If (GetPairing()) Then
+            Ctx.SetPairing(False)
             mMainForm.ClosePairForm()
             AddNewDevice(msg)
           Else
