@@ -32,7 +32,7 @@ Partial Class NotiForm
     Me.Blink = New System.Windows.Forms.Timer(Me.components)
     Me.Panel3 = New System.Windows.Forms.Panel()
     Me.LabelTitle = New System.Windows.Forms.Label()
-    Me.CloseButton1 = New noti_vb.net.CloseButton()
+    Me.CloseButton1 = New noti_vb.net.CloseButton1()
     Me.Panel1.SuspendLayout()
     Me.Panel2.SuspendLayout()
     CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -95,7 +95,7 @@ Partial Class NotiForm
     '
     'Panel3
     '
-    Me.Panel3.BackColor = System.Drawing.Color.Transparent
+    Me.Panel3.BackColor = System.Drawing.Color.Black
     Me.Panel3.Controls.Add(Me.CloseButton1)
     Me.Panel3.Controls.Add(Me.LabelTitle)
     Me.Panel3.Dock = System.Windows.Forms.DockStyle.Top
@@ -107,7 +107,7 @@ Partial Class NotiForm
     '
     'LabelTitle
     '
-    Me.LabelTitle.BackColor = System.Drawing.Color.Black
+    Me.LabelTitle.BackColor = System.Drawing.Color.Transparent
     Me.LabelTitle.Dock = System.Windows.Forms.DockStyle.Fill
     Me.LabelTitle.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(222, Byte))
     Me.LabelTitle.ForeColor = System.Drawing.Color.White
@@ -122,9 +122,9 @@ Partial Class NotiForm
     '
     Me.CloseButton1.Cursor = System.Windows.Forms.Cursors.Hand
     Me.CloseButton1.Dock = System.Windows.Forms.DockStyle.Right
-    Me.CloseButton1.Location = New System.Drawing.Point(288, 0)
+    Me.CloseButton1.Location = New System.Drawing.Point(292, 0)
     Me.CloseButton1.Name = "CloseButton1"
-    Me.CloseButton1.Size = New System.Drawing.Size(28, 16)
+    Me.CloseButton1.Size = New System.Drawing.Size(24, 16)
     Me.CloseButton1.TabIndex = 4
     Me.CloseButton1.Text = "CloseButton1"
     '
@@ -158,5 +158,5 @@ Partial Class NotiForm
   Friend WithEvents PictureBox1 As System.Windows.Forms.PictureBox
   Friend WithEvents Panel3 As System.Windows.Forms.Panel
   Friend WithEvents LabelTitle As System.Windows.Forms.Label
-  Friend WithEvents CloseButton1 As noti_vb.net.CloseButton
+  Friend WithEvents CloseButton1 As noti_vb.net.CloseButton1
 End Class

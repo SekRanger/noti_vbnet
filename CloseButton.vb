@@ -1,17 +1,10 @@
 ﻿Imports System.Windows.Forms.VisualStyles
 Public Class CloseButton
-  Inherits Control
   Private mRp As New VisualStyleRenderer(VisualStyleElement.Window.CloseButton.Pressed)
   Private mRh As New VisualStyleRenderer(VisualStyleElement.Window.CloseButton.Hot)
   Private mRn As New VisualStyleRenderer(VisualStyleElement.Window.CloseButton.Normal)
   Private mEntered As Boolean = False
   Private mClicked As Boolean = False
-
-  Public Sub New()
-    DoubleBuffered = True
-    Cursor = Cursors.Hand
-    'BackColor = Color.Transparent
-  End Sub
 
   Protected Overrides Sub OnMouseEnter(ByVal e As System.EventArgs)
     'MyBase.OnMouseEnter(e)
@@ -40,7 +33,7 @@ Public Class CloseButton
   End Sub
 
   Protected Overrides Sub OnPaint(ByVal e As System.Windows.Forms.PaintEventArgs)
-    MyBase.OnPaint(e)
+    'MyBase.OnPaint(e)
     If (mEntered) Then
       If (mClicked) Then
         mRp.DrawBackground(e.Graphics, Me.DisplayRectangle)
@@ -51,5 +44,21 @@ Public Class CloseButton
       mRn.DrawBackground(e.Graphics, Me.DisplayRectangle)
     End If
     'mRn.DrawParentBackground(e.Graphics, Me.DisplayRectangle, Me.Parent)
+  End Sub
+
+  Public Sub New()
+
+    ' This call is required by the designer.
+    InitializeComponent()
+
+    ' Add any initialization after the InitializeComponent() call.
+
+    DoubleBuffered = True
+    Cursor = Cursors.Hand
+    'BackColor = Color.Transparent
+    SetStyle(ControlStyles.UserPaint, True)
+    SetStyle(ControlStyles.SupportsTransparentBackColor, True)
+    SetStyle(ControlStyles.AllPaintingInWmPaint, True)
+    SetStyle(ControlStyles.ResizeRedraw, True)
   End Sub
 End Class

@@ -64,8 +64,7 @@ Public Class Ctx
     Dim m As New AndroidUdpBroadMsg(CType(msg, String))
     Dim f As NotiForm
 
-    If (Not mDictForm.ContainsKey(m.DeviceId)) Then
-      Debug.Print(m.DeviceId)
+    If ((Not mDictForm.ContainsKey(m.DeviceId)) AndAlso (m.MsgKey = "PAIR") AndAlso (mDictForm(m.DeviceId) IsNot Nothing) AndAlso (Not mDictForm(m.DeviceId).IsDisposed)) Then
       f = New NotiForm(m.DeviceId)
       mDictForm.Add(m.DeviceId, f)
       f.TopMost = True
