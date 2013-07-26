@@ -301,7 +301,7 @@ Public Class NotiForm
     mDragged = False
   End Sub
 
-  Private Sub Label1_Click(sender As System.Object, e As System.EventArgs) Handles Label1.Click
+  Private Sub CloseButton1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles CloseButton1.Click
     Me.Close()
   End Sub
 End Class

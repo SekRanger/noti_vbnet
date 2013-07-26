@@ -31,8 +31,8 @@ Partial Class NotiForm
     Me.ImageList1 = New System.Windows.Forms.ImageList(Me.components)
     Me.Blink = New System.Windows.Forms.Timer(Me.components)
     Me.Panel3 = New System.Windows.Forms.Panel()
-    Me.Label1 = New System.Windows.Forms.Label()
     Me.LabelTitle = New System.Windows.Forms.Label()
+    Me.CloseButton1 = New noti_vb.net.CloseButton()
     Me.Panel1.SuspendLayout()
     Me.Panel2.SuspendLayout()
     CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -96,26 +96,14 @@ Partial Class NotiForm
     'Panel3
     '
     Me.Panel3.BackColor = System.Drawing.Color.Transparent
-    Me.Panel3.Controls.Add(Me.Label1)
+    Me.Panel3.Controls.Add(Me.CloseButton1)
     Me.Panel3.Controls.Add(Me.LabelTitle)
     Me.Panel3.Dock = System.Windows.Forms.DockStyle.Top
     Me.Panel3.Location = New System.Drawing.Point(2, 2)
     Me.Panel3.Name = "Panel3"
+    Me.Panel3.Padding = New System.Windows.Forms.Padding(0, 0, 0, 2)
     Me.Panel3.Size = New System.Drawing.Size(316, 18)
     Me.Panel3.TabIndex = 2
-    '
-    'Label1
-    '
-    Me.Label1.Cursor = System.Windows.Forms.Cursors.Hand
-    Me.Label1.Dock = System.Windows.Forms.DockStyle.Right
-    Me.Label1.Font = New System.Drawing.Font("Webdings", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(2, Byte))
-    Me.Label1.ForeColor = System.Drawing.Color.White
-    Me.Label1.Location = New System.Drawing.Point(284, 0)
-    Me.Label1.Name = "Label1"
-    Me.Label1.Size = New System.Drawing.Size(32, 18)
-    Me.Label1.TabIndex = 4
-    Me.Label1.Text = "r"
-    Me.Label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
     '
     'LabelTitle
     '
@@ -125,10 +113,20 @@ Partial Class NotiForm
     Me.LabelTitle.ForeColor = System.Drawing.Color.White
     Me.LabelTitle.Location = New System.Drawing.Point(0, 0)
     Me.LabelTitle.Name = "LabelTitle"
-    Me.LabelTitle.Size = New System.Drawing.Size(316, 18)
+    Me.LabelTitle.Size = New System.Drawing.Size(316, 16)
     Me.LabelTitle.TabIndex = 3
     Me.LabelTitle.Text = "กิ้งกือสุนัข"
     Me.LabelTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
+    '
+    'CloseButton1
+    '
+    Me.CloseButton1.Cursor = System.Windows.Forms.Cursors.Hand
+    Me.CloseButton1.Dock = System.Windows.Forms.DockStyle.Right
+    Me.CloseButton1.Location = New System.Drawing.Point(288, 0)
+    Me.CloseButton1.Name = "CloseButton1"
+    Me.CloseButton1.Size = New System.Drawing.Size(28, 16)
+    Me.CloseButton1.TabIndex = 4
+    Me.CloseButton1.Text = "CloseButton1"
     '
     'NotiForm
     '
@@ -159,6 +157,6 @@ Partial Class NotiForm
   Friend WithEvents Blink As System.Windows.Forms.Timer
   Friend WithEvents PictureBox1 As System.Windows.Forms.PictureBox
   Friend WithEvents Panel3 As System.Windows.Forms.Panel
-  Friend WithEvents Label1 As System.Windows.Forms.Label
   Friend WithEvents LabelTitle As System.Windows.Forms.Label
+  Friend WithEvents CloseButton1 As noti_vb.net.CloseButton
 End Class

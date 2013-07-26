@@ -151,6 +151,9 @@ Public Class Ctx
     Dim f As NotiForm
     If (Not mDictForm.ContainsKey(m.DeviceId)) Then
       f = New NotiForm(m.DeviceId)
+      Debug.Print("mDictForm is nothing: " & (mDictForm Is Nothing))
+      Debug.Print("m is nothing: " & (m Is Nothing))
+      Debug.Print("f is nothing: " & (f Is Nothing))
       mDictForm.Add(m.DeviceId, f)
       f.SetLabelTitle(m.Model)
 
