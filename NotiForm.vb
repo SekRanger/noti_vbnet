@@ -1,4 +1,5 @@
 ﻿Imports System.Threading
+Imports Microsoft.Win32
 
 Public Class NotiForm
   Private Shared IS_RINGING As Boolean = False
@@ -14,6 +15,16 @@ Public Class NotiForm
   'Private mDictionary
   Private mCountMissedCall As Integer = 0
   Private mThreadCounter As Thread
+
+  Public WM_NCLBUTTONDOWN As Integer = &HA1
+  Public HTCAPTION As Integer = &H2
+  <System.Runtime.InteropServices.DllImport("User32.dll")> _
+  Public Shared Function ReleaseCapture() As Boolean
+  End Function
+
+  <System.Runtime.InteropServices.DllImport("User32.dll")> _
+  Public Shared Function SendMessage(ByVal hWnd As IntPtr, ByVal Msg As Integer, ByVal wParam As Integer, ByVal lParam As Integer) As Boolean
+  End Function
 
   Private Sub counter(ByVal o As Object)
     Dim startMsg As String = o.ToString()
@@ -73,6 +84,34 @@ Public Class NotiForm
     End If
   End Sub
 
+  Public Function LoadLocationFromHistory() As Point
+    Dim kSoftware As RegistryKey = My.Computer.Registry.CurrentUser.OpenSubKey("software", True)
+    Dim kAmeebaa As RegistryKey = kSoftware.CreateSubKey("Ameebaa")
+    Dim kPaired As RegistryKey = kAmeebaa.CreateSubKey("paired")
+    Dim kAttr As RegistryKey = kAmeebaa.CreateSubKey("attr")
+    Dim names() As String = kPaired.GetValueNames()
+    Dim kDevice As RegistryKey = kAttr.CreateSubKey(mDeviceId)
+    Dim posX As Integer = kDevice.GetValue("pos.x", -1)
+    'If (posX < 0) Then
+    'posX = 0
+    'End If
+    Dim posY As Integer = kDevice.GetValue("pos.y", -1)
+    'If (posY < 0) Then
+    'posY = 0
+    'End If
+    kDevice.Close()
+    kAttr.Close()
+    kPaired.Close()
+    kAmeebaa.Close()
+    kSoftware.Close()
+
+    If (posX < 0 OrElse posY < 0) Then
+      Return Point.Empty
+    Else
+      Return New Point(posX, posY)
+    End If
+  End Function
+
   Public Sub New(ByVal deviceId As String)
     mDeviceId = deviceId
     ' This call is required by the designer.
@@ -80,30 +119,24 @@ Public Class NotiForm
 
     ' Add any initialization after the InitializeComponent() call.
     'Debug.Print(My.Computer.Screen.WorkingArea.ToString())
-    Dim r As Rectangle = My.Computer.Screen.WorkingArea
-    Me.Top = r.Bottom - Me.Bottom - 8
-    Me.Left = r.Right - Me.Right - 8
-    'BgWk.RunWorkerAsync()
+
+
+
+    Dim savedLocation As Point = LoadLocationFromHistory()
+    If (savedLocation = Point.Empty) Then
+      Dim r As Rectangle = My.Computer.Screen.WorkingArea
+      Me.Top = r.Bottom - Me.Bottom - 8
+      Me.Left = r.Right - Me.Right - 8
+    Else
+      Me.Location = savedLocation
+    End If
     Me.LabelMessage.Text = String.Empty
     Me.TopMost = True
   End Sub
 
-  Private Sub NotiForm_FormClosed(sender As Object, e As System.Windows.Forms.FormClosedEventArgs) Handles Me.FormClosed
+  Private Sub NotiForm_FormClosed(ByVal sender As Object, ByVal e As System.Windows.Forms.FormClosedEventArgs) Handles Me.FormClosed
     StopShake()
     StopCounter()
-  End Sub
-
-  Private Sub NotiForm_MouseEnter(sender As Object, e As System.EventArgs) Handles Me.MouseEnter
-    Me.Opacity = 100
-  End Sub
-
-  Private Sub NotiForm_MouseLeave(sender As Object, e As System.EventArgs) Handles Me.MouseLeave
-    Debug.Print("asdfasdfasdf")
-    Me.Opacity = 0
-  End Sub
-
-  Private Sub NotiForm_MouseMove(sender As Object, e As System.Windows.Forms.MouseEventArgs) Handles Me.MouseMove
-    Debug.Print("asdfasdfasdf")
   End Sub
 
   Private Sub MainForm_Shown(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Shown
@@ -149,15 +182,41 @@ Public Class NotiForm
     End Get
   End Property
 
+  Private mMouseDowned As Boolean = False
+  Private mFormMoving As Boolean = False
+  Private Const WM_WINDOWPOSCHANGED As Integer = &H47
+
+  Private Sub LabelTitle_MouseDown1(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles LabelTitle.MouseDown
+    If (e.Button = MouseButtons.Left) Then
+      ReleaseCapture()
+      SendMessage(Handle, WM_NCLBUTTONDOWN, HTCAPTION, 0)
+      mMouseDowned = True
+    End If
+  End Sub
+
+  Private Sub LabelTitle_MouseUp1(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles LabelTitle.MouseUp
+    If (e.Button = MouseButtons.Left AndAlso mMouseDowned) Then
+      mMouseDowned = False
+    End If
+  End Sub
+
+  Private Sub SaveLocationToRegistry()
+    Dim kSoftware As RegistryKey = My.Computer.Registry.CurrentUser.OpenSubKey("software", True)
+    Dim kAmeebaa As RegistryKey = kSoftware.CreateSubKey("Ameebaa")
+    Dim kAttr As RegistryKey = kAmeebaa.CreateSubKey("attr")
+    Dim kDev As RegistryKey = kAttr.CreateSubKey(Me.mDeviceId)
+    kDev.SetValue("pos.x", Me.Location.X, RegistryValueKind.DWord)
+    kDev.SetValue("pos.y", Me.Location.Y, RegistryValueKind.DWord)
+    kDev.Close()
+    kAttr.Close()
+    kAmeebaa.Close()
+    kSoftware.Close()
+  End Sub
+
   Protected Overrides Sub WndProc(ByRef m As System.Windows.Forms.Message)
-    Select Case m.Msg
-      Case &H84
-        MyBase.WndProc(m)
-        If (CType(m.Result, Integer) = 1) Then
-          m.Result = 2
-        End If
-        Return
-    End Select
+    If (m.Msg = WM_WINDOWPOSCHANGED) Then
+      SaveLocationToRegistry()
+    End If
     MyBase.WndProc(m)
   End Sub
 
@@ -277,28 +336,6 @@ Public Class NotiForm
         mTalking = False
         mRingPhoneNo = String.Empty
     End Select
-  End Sub
-
-  Private mDragged As Boolean = False
-  Private mStartDragPoint As Point
-
-  Private Sub LabelTitle_MouseDown(sender As Object, e As System.Windows.Forms.MouseEventArgs)
-    mDragged = True
-    mStartDragPoint = e.Location
-  End Sub
-
-  Private Sub LabelTitle_MouseMove(sender As Object, e As System.Windows.Forms.MouseEventArgs)
-    If (mDragged) Then
-      Dim p1 As Point = e.Location
-      Dim p2 As Point = PointToScreen(p1)
-      Dim p3 As Point = New Point(p2.X - mStartDragPoint.X,
-                                     p2.Y - mStartDragPoint.Y)
-      Me.Location = p3
-    End If
-  End Sub
-
-  Private Sub LabelTitle_MouseUp(sender As Object, e As System.Windows.Forms.MouseEventArgs)
-    mDragged = False
   End Sub
 
   Private Sub CloseButton1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles CloseButton1.Click

@@ -101,7 +101,7 @@ Public Class Ctx
       Do
         mSocket = New System.Net.Sockets.UdpClient(60069)
 
-        Debug.Print("Wait for data")
+        'Debug.Print("Wait for data")
         bytes = mSocket.Receive(New System.Net.IPEndPoint(System.Net.IPAddress.Any, 60069))
         mSocket.Close()
         Dim msg As String = System.Text.UTF8Encoding.UTF8.GetString(bytes)
@@ -133,35 +133,36 @@ Public Class Ctx
     Dim kSoftware As RegistryKey = My.Computer.Registry.CurrentUser.OpenSubKey("software", True)
     Dim kAmeebaa As RegistryKey = kSoftware.CreateSubKey("Ameebaa")
     Dim kPaired As RegistryKey = kAmeebaa.CreateSubKey("paired")
+    Dim kAttr As RegistryKey = kAmeebaa.CreateSubKey("attr")
     Dim names() As String = kPaired.GetValueNames()
     For Each n As String In names
       Dim model As String = kPaired.GetValue(n, n)
       Dim msg As New AndroidUdpBroadMsg(n, model)
+
+      mShowNotiRe.Reset()
       Dim t As New Thread(AddressOf ShowNoti)
       t.Start(msg)
+      mShowNotiRe.WaitOne()
     Next
+    kAttr.Close()
     kPaired.Close()
     kAmeebaa.Close()
     kSoftware.Close()
   End Sub
 
-  Private Sub ShowNoti(msg As Object)
+  Private mShowNotiRe As New ManualResetEvent(False)
+  Private Sub ShowNoti(ByVal msg As Object)
     Dim m As AndroidUdpBroadMsg = CType(msg, AndroidUdpBroadMsg)
-    Dim f As NotiForm
     If (Not mDictForm.ContainsKey(m.DeviceId)) Then
-      f = New NotiForm(m.DeviceId)
-      Debug.Print("mDictForm is nothing: " & (mDictForm Is Nothing))
-      Debug.Print("m is nothing: " & (m Is Nothing))
-      Debug.Print("f is nothing: " & (f Is Nothing))
+      Dim f As NotiForm = New NotiForm(m.DeviceId)
       mDictForm.Add(m.DeviceId, f)
       f.SetLabelTitle(m.Model)
-
       f.TopMost = True
       AddHandler f.FormClosing, AddressOf FormClosing
+      mShowNotiRe.Set()
       Application.Run(f)
     Else
-      f = mDictForm(m.Model)
-      f.Toggle(True)
+      mDictForm(m.Model).Toggle(True)
     End If
   End Sub
 
