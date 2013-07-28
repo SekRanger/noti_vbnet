@@ -139,7 +139,7 @@ Public Class NotiForm
     StopCounter()
   End Sub
 
-  Private Sub MainForm_Shown(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Shown
+  Private Sub NotiForm_Shown(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Shown
     If (Not mJustStart) Then
       mJustStart = True
       'mWaitShown.Set()

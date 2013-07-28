@@ -150,6 +150,10 @@ Public Class Ctx
     kSoftware.Close()
   End Sub
 
+  Private Sub NotiForm_Shown(ByVal sender As Object, ByVal e As System.EventArgs)
+    mShowNotiRe.Set()
+  End Sub
+
   Private mShowNotiRe As New ManualResetEvent(False)
   Private Sub ShowNoti(ByVal msg As Object)
     Dim m As AndroidUdpBroadMsg = CType(msg, AndroidUdpBroadMsg)
@@ -158,8 +162,8 @@ Public Class Ctx
       mDictForm.Add(m.DeviceId, f)
       f.SetLabelTitle(m.Model)
       f.TopMost = True
+      AddHandler f.Shown, AddressOf NotiForm_Shown
       AddHandler f.FormClosing, AddressOf FormClosing
-      mShowNotiRe.Set()
       Application.Run(f)
     Else
       mDictForm(m.Model).Toggle(True)
